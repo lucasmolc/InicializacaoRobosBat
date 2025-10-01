@@ -1,5 +1,63 @@
 @echo off
-:: ==============================:: Verificar se é um repositório git
+:: ========================================
+:: Script de Inicialização Automática de Robô Python
+:: Versão Otimizada - Sem Ambiente Virtual
+:: ========================================
+
+setlocal EnableDelayedExpansion
+
+:: ============ CONFIGURAÇÕES - EDITE AQUI ============
+set "PYTHON_APP_DIR=C:\Projects\RaspagemInput"
+set "PYTHON_SCRIPT=main.py"
+set "PYTHON_EXECUTABLE=python"
+set "GIT_BRANCH=main"
+set "PAUSE_ON_EXIT=true"
+set "VERBOSE_OUTPUT=true"
+:: ===================================================
+
+:: Configurar arquivo de log com timestamp
+set "LOG_FILE=%~dp0logs\inicializacao_%date:~-4,4%%date:~-7,2%%date:~-10,2%_%time:~0,2%%time:~3,2%%time:~6,2%.log"
+set "LOG_FILE=%LOG_FILE: =0%"
+
+:: Criar diretório de logs se não existir
+if not exist "%~dp0logs" mkdir "%~dp0logs"
+
+:: Iniciar log
+echo ========================================== >> "%LOG_FILE%"
+echo [%date% %time%] Iniciando processo de verificacao e execucao >> "%LOG_FILE%"
+echo ========================================== >> "%LOG_FILE%"
+
+if "%VERBOSE_OUTPUT%"=="true" (
+    echo [INFO] Verificando atualizacoes do repositorio...
+)
+echo [%date% %time%] [INFO] Verificando atualizacoes do repositorio... >> "%LOG_FILE%"
+
+:: Verificar se o diretório da aplicação existe
+if not exist "%PYTHON_APP_DIR%" (
+    echo [ERRO] Diretorio da aplicacao nao encontrado: %PYTHON_APP_DIR%
+    echo [%date% %time%] [ERRO] Diretorio da aplicacao nao encontrado: %PYTHON_APP_DIR% >> "%LOG_FILE%"
+    if "%PAUSE_ON_EXIT%"=="true" (
+        echo.
+        echo Pressione qualquer tecla para continuar...
+        pause >nul
+    )
+    exit /b 1
+)
+
+:: Navegar para o diretório da aplicação
+pushd "%PYTHON_APP_DIR%"
+if %errorlevel% neq 0 (
+    echo [ERRO] Falha ao navegar para o diretorio: %PYTHON_APP_DIR%
+    echo [%date% %time%] [ERRO] Falha ao navegar para o diretorio: %PYTHON_APP_DIR% >> "%LOG_FILE%"
+    if "%PAUSE_ON_EXIT%"=="true" (
+        echo.
+        echo Pressione qualquer tecla para continuar...
+        pause >nul
+    )
+    exit /b 1
+)
+
+:: Verificar se é um repositório git
 if not exist ".git" (
     echo [AVISO] Este diretorio nao e um repositorio Git. Pulando verificacao de atualizacoes.
     echo [%date% %time%] [AVISO] Este diretorio nao e um repositorio Git. Pulando verificacao de atualizacoes. >> "%LOG_FILE%"
@@ -62,6 +120,11 @@ if not exist ".git" (
     echo [%date% %time%] [AVISO] Este diretorio nao e um repositorio Git. Pulando verificacao de atualizacoes. >> "%LOG_FILE%"
     goto :run_application
 )
+
+:: Configurar safe.directory ANTES de qualquer operação Git para evitar erro de ownership
+echo [INFO] Configurando repositorio Git para execucao como SYSTEM...
+echo [%date% %time%] [INFO] Configurando repositorio Git para execucao como SYSTEM... >> "%LOG_FILE%"
+git config --global --add safe.directory "%CD%" 2>>"%LOG_FILE%"
 
 :: Verificar status do repositório
 echo [INFO] Verificando status do repositorio...
@@ -147,6 +210,26 @@ if not exist "%PYTHON_SCRIPT%" (
     pause >nul
     popd
     exit /b 1
+)
+
+:: Verificar se Python está disponível
+echo [INFO] Verificando disponibilidade do Python...
+echo [%date% %time%] [INFO] Verificando disponibilidade do Python... >> "%LOG_FILE%"
+
+python --version >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [ERRO] Python nao encontrado no PATH do sistema
+    echo [%date% %time%] [ERRO] Python nao encontrado no PATH do sistema >> "%LOG_FILE%"
+    echo.
+    echo Solucoes possiveis:
+    echo 1. Instalar Python: https://python.org/downloads
+    echo 2. Adicionar Python ao PATH do sistema
+    echo 3. Editar PYTHON_EXECUTABLE no script para caminho completo
+    echo.
+    echo Pressione qualquer tecla para continuar...
+    pause >nul
+    popd
+    exit /b 9009
 )
 
 echo.

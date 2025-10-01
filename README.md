@@ -381,9 +381,16 @@ schtasks /query /tn "RoboPython_InicializacaoAutomatica" /fo LIST /v
 - Instale o Git for Windows
 - Ou adicione o Git ao PATH do sistema
 
-### Problema: "Python não encontrado"
-- Instale o Python e adicione ao PATH
-- Ou especifique o caminho completo: `set "PYTHON_EXECUTABLE=C:\Python39\python.exe"`
+### Problema: "Python não encontrado" (Código de erro 9009)
+```
+[ERRO] Python nao encontrado no PATH do sistema
+Aplicacao finalizada com codigo de erro: 9009
+```
+**Soluções:**
+1. **Instalar Python:** https://python.org/downloads (marque "Add to PATH")
+2. **Verificar PATH:** `python --version` no cmd
+3. **Caminho completo:** Edite `set "PYTHON_EXECUTABLE=C:\Python39\python.exe"`
+4. **Reinstalar Python:** Com opção "Add Python to environment variables"
 
 ### Problema: Encoding nos logs
 - Os logs são salvos em formato Windows (ANSI)
@@ -476,6 +483,24 @@ Os logs são salvos automaticamente em:
 ```
 logs/inicializacao_AAAAMMDD_HHMMSS.log
 ```
+
+### Códigos de Erro Comuns
+
+| Código | Significado | Solução |
+|--------|-------------|---------|
+| **0** | Sucesso | ✅ Aplicação executada normalmente |
+| **1** | Erro geral | Verificar logs para detalhes específicos |
+| **9009** | Comando não encontrado | Python não está no PATH - instalar/configurar Python |
+| **1** (Git) | Erro de Git | Problemas de repositório, ownership ou conectividade |
+| **125** | Erro de sintaxe Python | Verificar código Python da aplicação |
+
+### Como Interpretar os Logs
+```
+[01/10/2025 15:56:24,03] [INFO] Aplicacao finalizada com codigo: 9009
+```
+- **Data/Hora:** Timestamp da execução
+- **Nível:** [INFO], [ERRO], [AVISO], [SUCESSO]  
+- **Código de Saída:** 0 = sucesso, outros = erro específico
 
 Exemplo de log:
 ```
