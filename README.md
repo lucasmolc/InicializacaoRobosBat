@@ -33,6 +33,19 @@ set "VERBOSE_OUTPUT=true"
 
 Execute o arquivo `inicializar_robo.bat` diretamente.
 
+### 3. Inicialização Automática (Opcional)
+
+Para execução automática com o Windows:
+
+**Método Simples (Recomendado):**
+1. Execute `configurar_inicializacao.bat` **como Administrador**
+2. Siga o menu interativo
+3. Escolha opção 1 para configurar
+
+**Método Manual:**
+- Consulte o arquivo `INICIALIZACAO_WINDOWS.md` para instruções detalhadas
+- Use os scripts PowerShell individuais conforme necessidade
+
 ## Funcionalidades
 
 ### ✅ Verificação Git Automática
@@ -116,16 +129,29 @@ set "VERBOSE_OUTPUT=true"
 
 ## Automatização
 
-### Agendamento com Task Scheduler
-1. Abra o "Agendador de Tarefas" do Windows
-2. Criar Tarefa Básica
-3. Configure o horário desejado
-4. Ação: Iniciar programa
-5. Programa: `C:\Projects\InicializacaoRobosBat\inicializar_robo.bat`
+### Inicialização Automática com o Windows
 
-### Inicialização com o Windows
-1. Pressione `Win + R`, digite `shell:startup`
-2. Cole um atalho do arquivo `.bat` na pasta que abrir
+**🚀 Método Automático (Recomendado):**
+1. Execute `configurar_inicializacao.bat` como Administrador
+2. Escolha a opção de configuração no menu
+3. Reinicie para testar
+
+**⚙️ Recursos da Inicialização Automática:**
+- ✅ Execução com privilégios de administrador
+- ✅ Atraso de 2 minutos após boot (aguarda sistema carregar)
+- ✅ Reinicialização automática em falhas (até 3 tentativas)
+- ✅ Logs detalhados de execução
+- ✅ Funciona mesmo sem usuário logado
+
+**📋 Scripts de Gerenciamento:**
+- `configurar_inicializacao.bat` - Menu interativo completo
+- `configurar_inicializacao.ps1` - Configuração automática  
+- `verificar_inicializacao.ps1` - Verificação e teste
+- `remover_inicializacao.ps1` - Remoção completa
+- `INICIALIZACAO_WINDOWS.md` - Guia detalhado
+
+### Agendamento Manual com Task Scheduler
+Consulte `INICIALIZACAO_WINDOWS.md` para instruções detalhadas de configuração manual.
 
 ## Troubleshooting
 
