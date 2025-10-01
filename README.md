@@ -1,4 +1,37 @@
-# Sist## Estrutura de Arquivos
+# Sistema de Inicialização Automática de Robôs Python
+
+Script otimizado para inicializar automaticamente aplicações Python com verificação prévia de atualizações Git e configuração automática de inicialização do Windows.
+
+**Versão Atual:** Sistema completo com interface gráfica de menu e automação PowerShell para Windows Task Scheduler.
+
+## Requisitos do Sistema
+
+### Obrigatórios
+- **Windows 10/11** ou **Windows Server 2016+**
+- **PowerShell 5.1+** (já incluído no Windows)  
+- **Python 3.6+** instalado e no PATH do sistema
+- **Privilégios de Administrador** (para configuração automática)
+
+### Opcionais
+- **Git for Windows** (para verificação automática de updates)
+- **Visual Studio Code** (para edição dos arquivos)
+
+### Verificar Requisitos
+```cmd
+# Verificar Python:
+python --version
+
+# Verificar PowerShell:
+powershell -Command "$PSVersionTable.PSVersion"
+
+# Verificar Git (opcional):
+git --version
+
+# Verificar privilégios de admin:
+net session
+```
+
+## Estrutura de Arquivos
 
 ### Arquivos Principais (Raiz)
 - `inicializar_robo.bat` - **Script principal de execução**
@@ -11,38 +44,16 @@
 - `configurar_inicializacao.bat` - **Menu interativo para inicialização automática** ⭐
   - Interface amigável para todas as operações
   - Verificação automática de privilégios de administrador
-  - Gerenciamento completo da configuração
+  - Gerenciamento completo da configuração automática
 
-### Pasta `scripts/` (Scripts Auxiliares)
+### Pasta `scripts/` (Scripts PowerShell Auxiliares)
 **⚠️ NÃO execute estes arquivos diretamente - use o menu .bat**
 - `configurar_inicializacao.ps1` - Configuração automática via PowerShell
 - `verificar_inicializacao.ps1` - Verificação e teste da configuração
 - `remover_inicializacao.ps1` - Remoção completa da configuração
 
 ### Documentação
-- `README.md` - Este arquivo (documentação completa)nicialização Automática de Robôs Python
-
-Script otimizado para inicializar automaticamente aplicações Python com verificação prévia de atualizações Git. 
-
-**Versão Atual:** Script único sem dependências externas, otimizado para simplicidade e performance.
-
-## Arquivo Principal
-
-- `inicializar_robo.bat` - **Script principal de execução**
-  - Todas as configurações internas (sem arquivos externos)
-  - Sistema completo de logs com timestamp
-  - Verificação Git automática (fetch + pull quando necessário) 
-  - Validação robusta de configurações e arquivos
-  - Execução segura com códigos de saída apropriados
-
-- `configurar_inicializacao.bat` - **Menu interativo para inicialização automática**
-  - Interface amigável para todas as operações
-  - Verificação automática de privilégios de administrador
-  - Gerenciamento completo da configuração
-
-- `scripts/` - **Scripts PowerShell auxiliares** (não executar diretamente)
-  - Scripts de configuração, verificação e remoção
-  - Executados automaticamente via menu .bat
+- `README.md` - Este arquivo (documentação completa)
 
 ## Como Usar
 
@@ -168,17 +179,60 @@ set "VERBOSE_OUTPUT=true"
 3. Reinicie para testar
 
 **⚙️ Recursos da Inicialização Automática:**
-- ✅ Execução com privilégios de administrador
+- ✅ Execução com privilégios de administrador (conta SYSTEM)
 - ✅ Atraso de 2 minutos após boot (aguarda sistema carregar)
-- ✅ Reinicialização automática em falhas (até 3 tentativas)
-- ✅ Logs detalhados de execução
+- ✅ Reinicialização automática em falhas (até 3 tentativas, intervalo 1 minuto)
+- ✅ Execução mesmo em modo bateria
+- ✅ Continuidade mesmo se desconectar da fonte
+- ✅ Inicialização quando disponível (se perdeu horário agendado)
+- ✅ Logs detalhados de execução no Event Viewer
 - ✅ Funciona mesmo sem usuário logado
+
+**🔧 Configurações Técnicas Aplicadas:**
+- **Usuário:** SYSTEM (máximo privilégio)
+- **Tipo de Logon:** ServiceAccount
+- **Nível de Execução:** Highest (administrador)
+- **Política de Bateria:** Permitir início e continuidade
+- **Política de Falhas:** 3 tentativas com intervalo de 1 minuto
+- **Nome da Tarefa:** `RoboPython_InicializacaoAutomatica`
 
 **📋 Scripts de Gerenciamento:**
 - `configurar_inicializacao.bat` - Menu interativo completo (**USE ESTE**)
 - `scripts/configurar_inicializacao.ps1` - Configuração automática  
 - `scripts/verificar_inicializacao.ps1` - Verificação e teste
 - `scripts/remover_inicializacao.ps1` - Remoção completa
+
+### Scripts PowerShell - Parâmetros Avançados
+
+#### `configurar_inicializacao.ps1`
+```powershell
+# Parâmetros disponíveis:
+-Teste                    # Executa teste após configuração
+-CaminhoScript "caminho"  # Caminho personalizado do .bat (padrão: atual)
+-AtrasoMinutos 5          # Atraso em minutos após boot (padrão: 2)
+
+# Exemplos:
+PowerShell -ExecutionPolicy Bypass -File scripts\configurar_inicializacao.ps1 -Teste
+PowerShell -ExecutionPolicy Bypass -File scripts\configurar_inicializacao.ps1 -AtrasoMinutos 5
+```
+
+#### `verificar_inicializacao.ps1`
+```powershell
+# Parâmetros disponíveis:
+-Detalhado               # Exibe informações completas da tarefa
+
+# Exemplo:
+PowerShell -ExecutionPolicy Bypass -File scripts\verificar_inicializacao.ps1 -Detalhado
+```
+
+#### `remover_inicializacao.ps1`
+```powershell
+# Parâmetros disponíveis:
+-Forcado                 # Remove sem confirmação
+
+# Exemplo:
+PowerShell -ExecutionPolicy Bypass -File scripts\remover_inicializacao.ps1 -Forcado
+```
 
 ### Agendamento Manual com Task Scheduler
 
@@ -224,6 +278,42 @@ nssm start "RoboPython"
 
 ⚠️ **Nota:** Registro não executa com privilégios de admin automaticamente
 
+## Monitoramento e Verificação
+
+### Verificar Status da Configuração
+```cmd
+# Via menu interativo (recomendado):
+configurar_inicializacao.bat
+# → Escolha opção 2: "Verificar configuração atual"
+
+# Via PowerShell direto:
+PowerShell -ExecutionPolicy Bypass -File scripts\verificar_inicializacao.ps1
+
+# Com detalhes completos:
+PowerShell -ExecutionPolicy Bypass -File scripts\verificar_inicializacao.ps1 -Detalhado
+```
+
+### Testar Execução Manual
+```cmd
+# Testar tarefa agendada:
+schtasks /run /tn "RoboPython_InicializacaoAutomatica"
+
+# Verificar status:
+schtasks /query /tn "RoboPython_InicializacaoAutomatica" /fo LIST /v
+```
+
+### Logs do Windows Task Scheduler
+1. Abrir **Event Viewer** (`eventvwr.msc`)
+2. Navegar: **Windows Logs** → **Applications and Services Logs** → **Microsoft** → **Windows** → **TaskScheduler** → **Operational**
+3. Filtrar por Task Name: `RoboPython_InicializacaoAutomatica`
+
+### Localização dos Logs da Aplicação
+```
+C:\Projects\InicializacaoRobosBat\logs\
+├── inicializacao_AAAAMMDD_HHMMSS.log
+└── [outros logs de execução]
+```
+
 ## Troubleshooting
 
 ### Problema: "Diretório não encontrado"
@@ -247,6 +337,45 @@ nssm start "RoboPython"
 - Execute como administrador se houver problemas de permissão
 - Verifique se o Git está instalado e no PATH do sistema
 
+### Problemas de Inicialização Automática
+
+#### Problema: Configuração não funciona
+```cmd
+# Verificar se tem privilégios de admin:
+whoami /priv | findstr "SeDebugPrivilege"
+
+# Reconfigurar como admin:
+# Clique direito no PowerShell → "Executar como administrador"
+configurar_inicializacao.bat
+```
+
+#### Problema: Tarefa não executa no boot
+```cmd
+# Verificar se tarefa existe:
+schtasks /query /tn "RoboPython_InicializacaoAutomatica"
+
+# Verificar último resultado:
+schtasks /query /tn "RoboPython_InicializacaoAutomatica" /fo LIST /v | findstr "Last Result"
+
+# Resultado 0x0 = Sucesso
+# Outros códigos = Erro (consultar documentação Microsoft)
+```
+
+#### Problema: Execução Policy do PowerShell
+```cmd
+# Se erro de ExecutionPolicy, usar bypass:
+PowerShell -ExecutionPolicy Bypass -File scripts\configurar_inicializacao.ps1
+
+# Ou alterar política global (permanente):
+PowerShell -Command "Set-ExecutionPolicy RemoteSigned -Force"
+```
+
+#### Problema: Tarefa executa mas script falha
+- Verificar logs em `logs/inicializacao_*.log`
+- Testar script manualmente: executar `inicializar_robo.bat`  
+- Verificar se caminhos são absolutos (não relativos)
+- Garantir que conta SYSTEM tem acesso aos arquivos
+
 ## Logs
 
 Os logs são salvos automaticamente em:
@@ -269,3 +398,54 @@ Exemplo de log:
 [01/10/2025 14:30:20] [INFO] Processo finalizado
 [01/10/2025 14:30:20] [INFO] ==========================================
 ```
+
+## Segurança e Melhores Práticas
+
+### Considerações de Segurança
+- Scripts executam com privilégios SYSTEM (máximo nível)
+- Sempre revise configurações antes de aplicar
+- Use caminhos absolutos para evitar problemas de contexto
+- Mantenha logs para auditoria de execuções
+
+### Melhores Práticas
+- ✅ Execute `configurar_inicializacao.bat` sempre como Administrador
+- ✅ Teste manualmente antes de configurar inicialização automática  
+- ✅ Configure `PAUSE_ON_EXIT=false` para execução automática
+- ✅ Use `VERBOSE_OUTPUT=false` para logs mais limpos em produção
+- ✅ Monitore logs regularmente para detectar falhas
+- ✅ Mantenha backup das configurações importantes
+
+## Versionamento e Updates
+
+### Histórico de Versões
+- **v2.0** (Atual): Sistema completo com menu interativo e PowerShell
+- **v1.x**: Script básico sem automação de inicialização
+
+### Atualizações Futuras
+Para manter o sistema atualizado:
+```cmd
+cd C:\Projects\InicializacaoRobosBat
+git pull origin main
+```
+
+### Contribuições
+- Issues e sugestões são bem-vindos
+- Fork do projeto para contribuições
+- Siga as convenções de commit do Git
+
+## Suporte
+
+### Documentação Adicional
+- Consulte comentários nos arquivos `.bat` e `.ps1`
+- Logs detalhados em `logs/`
+- Event Viewer do Windows para logs do sistema
+
+### Contato
+- **Repositório:** [GitHub - InicializacaoRobosBat](https://github.com/lucasmolc/ImportacaoCSV)
+- **Issues:** Use o sistema de issues do GitHub
+- **Documentação:** Este arquivo README.md
+
+---
+
+**Última Atualização:** Outubro 2025  
+**Compatibilidade:** Windows 10/11, PowerShell 5.1+, Python 3.6+
