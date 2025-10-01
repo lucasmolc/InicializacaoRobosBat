@@ -6,7 +6,7 @@
 setlocal EnableDelayedExpansion
 
 :: Configurações (ajuste conforme necessário)
-set "PYTHON_APP_DIR=C:\Projects\RaspagemInput"
+set "PYTHON_APP_DIR=C:\Repositorios\RaspagemInput"
 set "PYTHON_SCRIPT=main.py"
 set "LOG_FILE=%~dp0logs\inicializacao_%date:~-4,4%%date:~-7,2%%date:~-10,2%_%time:~0,2%%time:~3,2%%time:~6,2%.log"
 
