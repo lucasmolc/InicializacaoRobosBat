@@ -2,7 +2,8 @@
 # Verifica se a tarefa agendada esta configurada corretamente
 
 param(
-    [switch]$Detalhado
+    [switch]$Detalhado,
+    [switch]$Testar
 )
 
 Write-Host "Verificador de Inicializacao Automatica - Robo Python" -ForegroundColor Cyan
@@ -78,6 +79,21 @@ try {
         Write-Host ""
         Write-Host "Para testar manualmente:" -ForegroundColor Yellow
         Write-Host "  Start-ScheduledTask -TaskName '$NomeTarefa'" -ForegroundColor White
+        
+        # Testar se solicitado
+        if ($Testar) {
+            Write-Host "" -ForegroundColor White
+            Write-Host "Testando tarefa..." -ForegroundColor Blue
+            try {
+                Start-ScheduledTask -TaskName $NomeTarefa
+                Start-Sleep -Seconds 3
+                $status = Get-ScheduledTask -TaskName $NomeTarefa | Select-Object -ExpandProperty State
+                Write-Host "Status após teste: $status" -ForegroundColor White
+                Write-Host "Verifique os logs para detalhes da execução" -ForegroundColor Yellow
+            } catch {
+                Write-Host "ERRO ao executar teste: $($_.Exception.Message)" -ForegroundColor Red
+            }
+        }
 
     } else {
         Write-Host "STATUS: NAO CONFIGURADO" -ForegroundColor Red

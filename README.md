@@ -31,6 +31,50 @@ git --version
 net session
 ```
 
+## Portabilidade Entre Máquinas
+
+### 🔄 **Caminhos Dinâmicos Automatizados**
+O sistema foi projetado para funcionar em qualquer máquina sem modificações:
+
+**✅ Scripts PowerShell:** Detectam automaticamente o diretório de instalação
+```powershell
+# O caminho é calculado dinamicamente baseado na localização do script
+$ScriptDir = Split-Path -Parent $PSScriptRoot
+$CaminhoScript = Join-Path $ScriptDir "inicializar_robo.bat"
+```
+
+**✅ Menu .BAT:** Usa caminhos relativos automáticos
+```batch
+# %~dp0 = diretório onde está o arquivo .bat atual
+powershell -ExecutionPolicy Bypass -File "%~dp0scripts\configurar_inicializacao.ps1"
+```
+
+**✅ Logs:** Sempre salvos relativamente ao diretório do script
+```batch
+# Logs sempre no subdiretório "logs" do script principal
+set "LOG_FILE=%~dp0logs\inicializacao_AAAAMMDD_HHMMSS.log"
+```
+
+### 📋 **Apenas UMA Configuração Manual Necessária**
+Você precisa editar **apenas** o arquivo `inicializar_robo.bat` uma vez:
+```batch
+:: ÚNICO local que precisa ser editado para sua aplicação específica
+set "PYTHON_APP_DIR=C:\Caminho\Para\SuaAplicacao"
+set "PYTHON_SCRIPT=main.py"
+```
+
+### 🚀 **Processo de Instalação em Nova Máquina**
+1. **Copiar** a pasta completa `InicializacaoRobosBat` para qualquer local
+2. **Editar** apenas `PYTHON_APP_DIR` no `inicializar_robo.bat`
+3. **Executar** `configurar_inicializacao.bat` como administrador
+4. **Pronto!** O sistema funciona automaticamente
+
+### 🔧 **Compatibilidade Garantida**
+- ✅ **Windows 10/11** - Qualquer versão
+- ✅ **Qualquer diretório** - C:\, D:\, rede, etc.
+- ✅ **Qualquer usuário** - Scripts se adaptam automaticamente
+- ✅ **Múltiplas máquinas** - Basta copiar a pasta completa
+
 ## Estrutura de Arquivos
 
 ### Arquivos Principais (Raiz)
@@ -57,18 +101,28 @@ net session
 
 ## Como Usar
 
-### 1. Configuração (OBRIGATÓRIA)
+### 1. Configuração (OBRIGATÓRIA - UMA ÚNICA VEZ)
 
-Edite o arquivo `inicializar_robo.bat` e configure as variáveis no início:
+**📍 Localização:** Edite **APENAS** o arquivo `inicializar_robo.bat` (linhas 9-15):
 
 ```batch
 :: ============ CONFIGURAÇÕES - EDITE AQUI ============
-set "PYTHON_APP_DIR=C:\caminho\para\sua\aplicacao"
-set "PYTHON_SCRIPT=main.py"
-set "PYTHON_EXECUTABLE=python"
-set "GIT_BRANCH=main"
-set "PAUSE_ON_EXIT=true"
-set "VERBOSE_OUTPUT=true"
+:: ⚠️  ATENÇÃO: Configure apenas o caminho da SUA aplicação Python
+:: 🔄 Todos os outros caminhos são calculados automaticamente
+
+set "PYTHON_APP_DIR=C:\caminho\para\sua\aplicacao"  :: ← EDITE ESTE
+set "PYTHON_SCRIPT=main.py"                        :: ← EDITE SE NECESSÁRIO
+set "PYTHON_EXECUTABLE=python"                     :: ← PADRÃO: OK
+set "GIT_BRANCH=main"                              :: ← EDITE SE NECESSÁRIO
+set "PAUSE_ON_EXIT=true"                           :: ← PADRÃO: OK
+set "VERBOSE_OUTPUT=true"                          :: ← PADRÃO: OK
+```
+
+**🎯 Exemplo de Configuração Real:**
+```batch
+set "PYTHON_APP_DIR=C:\MeusProjetos\RaspagemInput"  :: Sua aplicação
+set "PYTHON_SCRIPT=main.py"                        :: Arquivo principal
+:: ✅ Todos os outros caminhos (logs, scripts) são automáticos!
 ```
 
 ### 2. Execução
@@ -117,8 +171,8 @@ Para execução automática com o Windows:
 
 ### Configurações Obrigatórias
 ```batch
-set "PYTHON_APP_DIR=C:\Projects\MeuRobo"  :: Caminho da aplicação
-set "PYTHON_SCRIPT=main.py"               :: Arquivo Python principal
+set "PYTHON_APP_DIR=C:\Caminho\Para\SuaAplicacao"  :: Caminho da aplicação
+set "PYTHON_SCRIPT=main.py"                        :: Arquivo Python principal
 ```
 
 ### Configurações Opcionais
@@ -140,7 +194,7 @@ set "VERBOSE_OUTPUT=false"
 
 ### Exemplo 1: Aplicação Simples
 ```batch
-set "PYTHON_APP_DIR=C:\Projects\MeuRobo"
+set "PYTHON_APP_DIR=C:\Caminho\Para\MeuRobo"
 set "PYTHON_SCRIPT=main.py"
 set "PYTHON_EXECUTABLE=python"
 set "GIT_BRANCH=main"
@@ -151,7 +205,7 @@ set "VERBOSE_OUTPUT=true"
 
 ### Exemplo 2: Execução Automática (Sem Interação)
 ```batch
-set "PYTHON_APP_DIR=C:\Projects\MeuRobo"
+set "PYTHON_APP_DIR=C:\Caminho\Para\MeuRobo"
 set "PYTHON_SCRIPT=orquestrador_fila.py"
 set "PYTHON_EXECUTABLE=python"
 set "GIT_BRANCH=master"
@@ -161,7 +215,7 @@ set "VERBOSE_OUTPUT=false"
 
 ### Exemplo 3: Projeto com Branch Específico
 ```batch
-set "PYTHON_APP_DIR=C:\Projects\RaspagemInput"
+set "PYTHON_APP_DIR=C:\Caminho\Para\RaspagemInput"
 set "PYTHON_SCRIPT=main.py"
 set "PYTHON_EXECUTABLE=python"
 set "GIT_BRANCH=development"
@@ -208,12 +262,13 @@ set "VERBOSE_OUTPUT=true"
 ```powershell
 # Parâmetros disponíveis:
 -Teste                    # Executa teste após configuração
--CaminhoScript "caminho"  # Caminho personalizado do .bat (padrão: atual)
 -AtrasoMinutos 5          # Atraso em minutos após boot (padrão: 2)
 
 # Exemplos:
 PowerShell -ExecutionPolicy Bypass -File scripts\configurar_inicializacao.ps1 -Teste
 PowerShell -ExecutionPolicy Bypass -File scripts\configurar_inicializacao.ps1 -AtrasoMinutos 5
+
+# Nota: O caminho do script é detectado automaticamente
 ```
 
 #### `verificar_inicializacao.ps1`
@@ -254,7 +309,7 @@ PowerShell -ExecutionPolicy Bypass -File scripts\remover_inicializacao.ps1 -Forc
 
 4. **Configurar Ações**
    - Aba "Ações" → "Nova..."
-   - Programa/script: `C:\Projects\InicializacaoRobosBat\inicializar_robo.bat`
+   - Programa/script: `C:\Caminho\Para\InicializacaoRobosBat\inicializar_robo.bat`
 
 5. **Configurar Configurações**
    - ✅ "Permitir que a tarefa seja executada sob demanda"
@@ -266,7 +321,7 @@ PowerShell -ExecutionPolicy Bypass -File scripts\remover_inicializacao.ps1 -Forc
 ```cmd
 # Baixar NSSM de https://nssm.cc/download
 cd C:\nssm\win64
-nssm install "RoboPython" "C:\Projects\InicializacaoRobosBat\inicializar_robo.bat"
+nssm install "RoboPython" "C:\Caminho\Para\InicializacaoRobosBat\inicializar_robo.bat"
 nssm set "RoboPython" Start SERVICE_AUTO_START
 nssm start "RoboPython"
 ```
@@ -309,7 +364,7 @@ schtasks /query /tn "RoboPython_InicializacaoAutomatica" /fo LIST /v
 
 ### Localização dos Logs da Aplicação
 ```
-C:\Projects\InicializacaoRobosBat\logs\
+<DiretorioDoScript>\logs\
 ├── inicializacao_AAAAMMDD_HHMMSS.log
 └── [outros logs de execução]
 ```
@@ -376,6 +431,28 @@ PowerShell -Command "Set-ExecutionPolicy RemoteSigned -Force"
 - Verificar se caminhos são absolutos (não relativos)
 - Garantir que conta SYSTEM tem acesso aos arquivos
 
+### Problemas de Portabilidade
+
+#### Problema: Script não funciona em máquina diferente
+```cmd
+# Verificar se editou apenas o PYTHON_APP_DIR:
+type inicializar_robo.bat | findstr "PYTHON_APP_DIR"
+
+# NÃO edite outros caminhos - eles são automáticos!
+# ❌ ERRADO: Editar caminhos de logs, scripts PowerShell
+# ✅ CORRETO: Editar apenas PYTHON_APP_DIR
+```
+
+#### Problema: Caminhos não encontrados após copiar para nova máquina
+- **Solução:** Os scripts se adaptam automaticamente ao novo local
+- **Verificar:** Apenas `PYTHON_APP_DIR` deve ser editado
+- **Reconfigurar:** Execute `configurar_inicializacao.bat` como admin na nova máquina
+
+#### Problema: Logs não são gerados
+- **Causa:** Permissões na pasta de destino
+- **Solução:** Os logs são sempre salvos relativamente ao script (automático)
+- **Localização:** `<DiretorioDoScript>\logs\` (criado automaticamente)
+
 ## Logs
 
 Os logs são salvos automaticamente em:
@@ -388,7 +465,7 @@ Exemplo de log:
 [01/10/2025 14:30:15] [INFO] ==========================================
 [01/10/2025 14:30:15] [INFO] Iniciando Sistema de Inicialização v2.0  
 [01/10/2025 14:30:15] [INFO] ==========================================
-[01/10/2025 14:30:15] [INFO] Navegado para: C:\Projects\RaspagemInput
+[01/10/2025 14:30:15] [INFO] Navegado para: C:\Caminho\Para\RaspagemInput
 [01/10/2025 14:30:16] [INFO] Verificando atualizações do repositório Git
 [01/10/2025 14:30:16] [INFO] Repositório já esta atualizado
 [01/10/2025 14:30:16] [INFO] Iniciando aplicacao: python main.py
@@ -418,13 +495,21 @@ Exemplo de log:
 ## Versionamento e Updates
 
 ### Histórico de Versões
-- **v2.0** (Atual): Sistema completo com menu interativo e PowerShell
+- **v2.1** (Atual): Sistema com caminhos totalmente dinâmicos e portabilidade completa
+- **v2.0**: Sistema completo com menu interativo e PowerShell
 - **v1.x**: Script básico sem automação de inicialização
+
+### Melhorias v2.1 - Portabilidade Total
+- ✅ **Caminhos Dinâmicos:** Scripts detectam localização automaticamente
+- ✅ **Portabilidade:** Funciona em qualquer máquina sem reconfiguração
+- ✅ **Instalação Simples:** Apenas copiar pasta + editar 1 linha
+- ✅ **Compatibilidade:** Windows 10/11, qualquer diretório
+- ✅ **Teste Automático:** Funcionalidade de teste integrada ao menu
 
 ### Atualizações Futuras
 Para manter o sistema atualizado:
 ```cmd
-cd C:\Projects\InicializacaoRobosBat
+cd <CaminhoDoSeuDiretorio>\InicializacaoRobosBat
 git pull origin main
 ```
 

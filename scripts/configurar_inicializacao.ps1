@@ -3,9 +3,12 @@
 
 param(
     [switch]$Teste,
-    [string]$CaminhoScript = "C:\Projects\InicializacaoRobosBat\inicializar_robo.bat",
     [int]$AtrasoMinutos = 2
 )
+
+# Definir caminho dinamico automaticamente
+$ScriptDir = Split-Path -Parent $PSScriptRoot
+$CaminhoScript = Join-Path $ScriptDir "inicializar_robo.bat"
 
 # Verificar se esta executando como administrador
 if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
