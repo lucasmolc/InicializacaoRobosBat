@@ -149,6 +149,8 @@ Para execução automática com o Windows:
 - Executa `git pull` automaticamente se necessário
 - Continua mesmo se não for um repositório Git
 - Suporte a branches específicos
+- **Resolução automática de problemas de ownership** (dubious ownership)
+- Configuração automática de `safe.directory` para execução como SYSTEM
 
 ### ✅ Sistema de Logs Inteligente
 - Logs detalhados com timestamp em `logs/inicializacao_AAAAMMDD_HHMMSS.log`
@@ -431,6 +433,21 @@ PowerShell -Command "Set-ExecutionPolicy RemoteSigned -Force"
 - Verificar se caminhos são absolutos (não relativos)
 - Garantir que conta SYSTEM tem acesso aos arquivos
 
+#### Problema: Git "dubious ownership" quando executado como SYSTEM
+```
+fatal: detected dubious ownership in repository at 'C:/Caminho/Para/Repo'
+```
+**Causa:** Windows Task Scheduler executa como SYSTEM, mas repositório pertence ao usuário
+**Solução Automática:** O script resolve automaticamente configurando `git config --global --add safe.directory`
+**Verificação Manual:**
+```cmd
+# Verificar configuração atual:
+git config --global --get-all safe.directory
+
+# Adicionar manualmente se necessário:
+git config --global --add safe.directory "C:\Caminho\Para\SeuRepositorio"
+```
+
 ### Problemas de Portabilidade
 
 #### Problema: Script não funciona em máquina diferente
@@ -505,6 +522,7 @@ Exemplo de log:
 - ✅ **Instalação Simples:** Apenas copiar pasta + editar 1 linha
 - ✅ **Compatibilidade:** Windows 10/11, qualquer diretório
 - ✅ **Teste Automático:** Funcionalidade de teste integrada ao menu
+- ✅ **Git Ownership Fix:** Resolução automática de problemas de execução como SYSTEM
 
 ### Atualizações Futuras
 Para manter o sistema atualizado:

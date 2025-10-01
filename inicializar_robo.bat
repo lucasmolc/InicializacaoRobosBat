@@ -1,5 +1,19 @@
 @echo off
-:: ========================================
+:: ==============================:: Verificar se é um repositório git
+if not exist ".git" (
+    echo [AVISO] Este diretorio nao e um repositorio Git. Pulando verificacao de atualizacoes.
+    echo [%date% %time%] [AVISO] Este diretorio nao e um repositorio Git. Pulando verificacao de atualizacoes. >> "%LOG_FILE%"
+    goto :run_application
+)
+
+:: Configurar safe.directory para evitar erro de ownership quando executado como SYSTEM
+echo [INFO] Configurando repositorio Git para execucao como SYSTEM...
+echo [%date% %time%] [INFO] Configurando repositorio Git para execucao como SYSTEM... >> "%LOG_FILE%"
+git config --global --add safe.directory "%CD%" 2>>"%LOG_FILE%"
+
+:: Verificar status do repositório
+echo [INFO] Verificando status do repositorio...
+echo [%date% %time%] [INFO] Verificando status do repositorio... >> "%LOG_FILE%"
 :: Script de Inicialização Automática de Robô Python
 :: ========================================
 
@@ -53,11 +67,31 @@ if not exist ".git" (
 echo [INFO] Verificando status do repositorio...
 echo [%date% %time%] [INFO] Verificando status do repositorio... >> "%LOG_FILE%"
 
-git fetch origin 2>>"%LOG_FILE%"
+::Criar arquivo temporário para capturar erro do git
+set "TEMP_ERROR=%TEMP%\git_error_%RANDOM%.tmp"
+git fetch origin 2>"%TEMP_ERROR%"
 if %errorlevel% neq 0 (
-    echo [AVISO] Falha ao executar git fetch. Continuando sem atualizacao.
-    echo [%date% %time%] [AVISO] Falha ao executar git fetch. Continuando sem atualizacao. >> "%LOG_FILE%"
-    goto :run_application
+    :: Verificar se é erro de ownership
+    findstr /C:"dubious ownership" "%TEMP_ERROR%" >nul
+    if %errorlevel% equ 0 (
+        echo [INFO] Resolvendo problema de ownership do Git...
+        echo [%date% %time%] [INFO] Resolvendo problema de ownership do Git... >> "%LOG_FILE%"
+        :: Tentar novamente após configurar safe.directory
+        git fetch origin 2>>"%LOG_FILE%"
+        if %errorlevel% neq 0 (
+            echo [AVISO] Falha ao executar git fetch mesmo apos configuracao. Continuando sem atualizacao.
+            echo [%date% %time%] [AVISO] Falha ao executar git fetch mesmo apos configuracao. Continuando sem atualizacao. >> "%LOG_FILE%"
+            type "%TEMP_ERROR%" >> "%LOG_FILE%"
+        )
+    ) else (
+        echo [AVISO] Falha ao executar git fetch. Continuando sem atualizacao.
+        echo [%date% %time%] [AVISO] Falha ao executar git fetch. Continuando sem atualizacao. >> "%LOG_FILE%"
+        type "%TEMP_ERROR%" >> "%LOG_FILE%"
+    )
+    if exist "%TEMP_ERROR%" del "%TEMP_ERROR%"
+    if %errorlevel% neq 0 goto :run_application
+) else (
+    if exist "%TEMP_ERROR%" del "%TEMP_ERROR%"
 )
 
 :: Verificar se há commits remotos para puxar
@@ -66,13 +100,34 @@ if %errorlevel% equ 0 (
     echo [INFO] Atualizacoes encontradas! Executando git pull...
     echo [%date% %time%] [INFO] Atualizacoes encontradas! Executando git pull... >> "%LOG_FILE%"
     
-    git pull origin 2>>"%LOG_FILE%"
+    set "TEMP_PULL_ERROR=%TEMP%\git_pull_error_%RANDOM%.tmp"
+    git pull origin 2>"%TEMP_PULL_ERROR%"
     if %errorlevel% equ 0 (
         echo [SUCESSO] Repositorio atualizado com sucesso!
         echo [%date% %time%] [SUCESSO] Repositorio atualizado com sucesso! >> "%LOG_FILE%"
+        if exist "%TEMP_PULL_ERROR%" del "%TEMP_PULL_ERROR%"
     ) else (
-        echo [ERRO] Falha ao executar git pull. Verifique os logs.
-        echo [%date% %time%] [ERRO] Falha ao executar git pull. Verifique os logs. >> "%LOG_FILE%"
+        :: Verificar se é erro de ownership no git pull também
+        findstr /C:"dubious ownership" "%TEMP_PULL_ERROR%" >nul
+        if %errorlevel% equ 0 (
+            echo [INFO] Resolvendo problema de ownership para git pull...
+            echo [%date% %time%] [INFO] Resolvendo problema de ownership para git pull... >> "%LOG_FILE%"
+            :: Tentar git pull novamente
+            git pull origin 2>>"%LOG_FILE%"
+            if %errorlevel% equ 0 (
+                echo [SUCESSO] Repositorio atualizado com sucesso apos correcao!
+                echo [%date% %time%] [SUCESSO] Repositorio atualizado com sucesso apos correcao! >> "%LOG_FILE%"
+            ) else (
+                echo [ERRO] Falha ao executar git pull mesmo apos configuracao. Verifique os logs.
+                echo [%date% %time%] [ERRO] Falha ao executar git pull mesmo apos configuracao. Verifique os logs. >> "%LOG_FILE%"
+                type "%TEMP_PULL_ERROR%" >> "%LOG_FILE%"
+            )
+        ) else (
+            echo [ERRO] Falha ao executar git pull. Verifique os logs.
+            echo [%date% %time%] [ERRO] Falha ao executar git pull. Verifique os logs. >> "%LOG_FILE%"
+            type "%TEMP_PULL_ERROR%" >> "%LOG_FILE%"
+        )
+        if exist "%TEMP_PULL_ERROR%" del "%TEMP_PULL_ERROR%"
         echo.
         echo Pressione qualquer tecla para continuar mesmo assim...
         pause >nul
