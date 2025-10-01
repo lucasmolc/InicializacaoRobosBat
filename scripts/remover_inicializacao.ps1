@@ -1,5 +1,5 @@
-# Removedor de Inicialização Automática - Robô Python
-# Remove completamente a configuração de inicialização automática
+# Removedor de Inicializacao Automatica - Robo Python
+# Remove a configuracao de inicializacao automatica
 
 param(
     [switch]$Forcar,
@@ -7,17 +7,16 @@ param(
 )
 
 if (-not $Silencioso) {
-    Write-Host "🗑️  Removedor de Inicialização Automática - Robô Python" -ForegroundColor Red
-    Write-Host "=" * 60 -ForegroundColor Red
+    Write-Host "Removedor de Inicializacao Automatica" -ForegroundColor Red
+    Write-Host "=====================================" -ForegroundColor Red
     Write-Host ""
 }
 
 $NomeTarefa = "RoboPython_InicializacaoAutomatica"
 
-# Verificar se está executando como administrador
+# Verificar admin
 if (-NOT ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
-    Write-Host "❌ ERRO: Este script deve ser executado como Administrador!" -ForegroundColor Red
-    Write-Host "   Clique direito no PowerShell e selecione 'Executar como administrador'" -ForegroundColor Yellow
+    Write-Host "ERRO: Execute como Administrador!" -ForegroundColor Red
     if (-not $Silencioso) {
         Read-Host "Pressione Enter para sair"
     }
@@ -30,117 +29,67 @@ try {
     
     if (-not $tarefa) {
         if (-not $Silencioso) {
-            Write-Host "ℹ️  Tarefa '$NomeTarefa' não encontrada" -ForegroundColor Blue
-            Write-Host "   A inicialização automática já foi removida ou nunca foi configurada" -ForegroundColor White
+            Write-Host "Tarefa nao encontrada - ja foi removida" -ForegroundColor Blue
         }
     } else {
-        # Confirmar remoção se não estiver no modo forçado
+        # Confirmar se nao forcado
         if (-not $Forcar -and -not $Silencioso) {
-            Write-Host "⚠️  Tarefa encontrada: $NomeTarefa" -ForegroundColor Yellow
-            Write-Host "   Esta ação irá remover completamente a inicialização automática" -ForegroundColor White
-            Write-Host ""
-            
-            $confirmacao = Read-Host "Deseja continuar? (S/N)"
+            Write-Host "Tarefa encontrada: $NomeTarefa" -ForegroundColor Yellow
+            Write-Host "Isso ira remover a inicializacao automatica" -ForegroundColor White
+            $confirmacao = Read-Host "Continuar? (S/N)"
             if ($confirmacao -notmatch "^[SsYy]") {
-                Write-Host "❌ Operação cancelada pelo usuário" -ForegroundColor Yellow
-                Read-Host "Pressione Enter para sair"
+                Write-Host "Cancelado" -ForegroundColor Yellow
                 exit 0
             }
-            Write-Host ""
         }
 
-        # Parar a tarefa se estiver executando
-        $estadoTarefa = $tarefa.State
-        if ($estadoTarefa -eq "Running") {
+        # Parar se executando
+        if ($tarefa.State -eq "Running") {
             if (-not $Silencioso) {
-                Write-Host "⏹️  Parando tarefa em execução..." -ForegroundColor Blue
+                Write-Host "Parando tarefa..." -ForegroundColor Blue
             }
             Stop-ScheduledTask -TaskName $NomeTarefa -ErrorAction SilentlyContinue
-            Start-Sleep -Seconds 2
         }
 
-        # Remover a tarefa
+        # Remover tarefa
         if (-not $Silencioso) {
-            Write-Host "🗑️  Removendo tarefa agendada..." -ForegroundColor Red
+            Write-Host "Removendo tarefa..." -ForegroundColor Red
         }
-        
         Unregister-ScheduledTask -TaskName $NomeTarefa -Confirm:$false
         
         if (-not $Silencioso) {
-            Write-Host "✅ Tarefa removida com sucesso!" -ForegroundColor Green
+            Write-Host "Tarefa removida com sucesso!" -ForegroundColor Green
         }
     }
 
-    # Verificar outras configurações de inicialização automática
+    # Limpar outras configuracoes
     if (-not $Silencioso) {
-        Write-Host ""
-        Write-Host "🔍 Verificando outras configurações de inicialização..." -ForegroundColor Cyan
+        Write-Host "Verificando outras configuracoes..." -ForegroundColor Cyan
     }
 
-    # Verificar Registro do Windows
-    $chaveRegistro = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
-    $valoresRegistro = @("RoboPython", "RoboPythonInit", "InicializacaoRobo")
-    $encontrouRegistro = $false
-
-    foreach ($valor in $valoresRegistro) {
-        $entradaRegistro = Get-ItemProperty -Path $chaveRegistro -Name $valor -ErrorAction SilentlyContinue
-        if ($entradaRegistro) {
-            $encontrouRegistro = $true
-            if (-not $Silencioso) {
-                Write-Host "   🔧 Removendo entrada do registro: $valor" -ForegroundColor Blue
-            }
-            Remove-ItemProperty -Path $chaveRegistro -Name $valor -ErrorAction SilentlyContinue
-        }
-    }
-
-    if (-not $encontrouRegistro -and -not $Silencioso) {
-        Write-Host "   ✅ Nenhuma entrada encontrada no registro" -ForegroundColor Green
-    } elseif ($encontrouRegistro -and -not $Silencioso) {
-        Write-Host "   ✅ Entradas do registro removidas" -ForegroundColor Green
-    }
-
-    # Verificar pasta Startup
-    $pastaStartup = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup"
-    $arquivosStartup = Get-ChildItem $pastaStartup -Filter "*robo*" -ErrorAction SilentlyContinue
+    # Registry
+    $chaveReg = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+    $valores = @("RoboPython", "RoboPythonInit", "InicializacaoRobo")
     
-    if ($arquivosStartup.Count -gt 0) {
-        foreach ($arquivo in $arquivosStartup) {
+    foreach ($valor in $valores) {
+        $entrada = Get-ItemProperty -Path $chaveReg -Name $valor -ErrorAction SilentlyContinue
+        if ($entrada) {
             if (-not $Silencioso) {
-                Write-Host "   🔧 Removendo da pasta Startup: $($arquivo.Name)" -ForegroundColor Blue
+                Write-Host "Removendo do registry: $valor" -ForegroundColor Blue
             }
-            Remove-Item $arquivo.FullName -Force -ErrorAction SilentlyContinue
+            Remove-ItemProperty -Path $chaveReg -Name $valor -ErrorAction SilentlyContinue
         }
-        if (-not $Silencioso) {
-            Write-Host "   ✅ Arquivos da pasta Startup removidos" -ForegroundColor Green
-        }
-    } elseif (-not $Silencioso) {
-        Write-Host "   ✅ Nenhum arquivo encontrado na pasta Startup" -ForegroundColor Green
     }
 
     if (-not $Silencioso) {
         Write-Host ""
-        Write-Host "🎉 Remoção concluída com sucesso!" -ForegroundColor Green
-        Write-Host ""
-        Write-Host "📝 O que foi feito:" -ForegroundColor Cyan
-        Write-Host "   ✅ Tarefa agendada removida" -ForegroundColor White
-        Write-Host "   ✅ Entradas do registro verificadas e limpas" -ForegroundColor White
-        Write-Host "   ✅ Pasta Startup verificada e limpa" -ForegroundColor White
-        Write-Host ""
-        Write-Host "💡 Para reativar a inicialização automática:" -ForegroundColor Yellow
-        Write-Host "   Execute: .\configurar_inicializacao.ps1" -ForegroundColor White
+        Write-Host "Remocao concluida!" -ForegroundColor Green
+        Write-Host "Para reativar, execute configurar_inicializacao.bat" -ForegroundColor Yellow
     }
 
 } catch {
-    Write-Host "❌ ERRO durante a remoção:" -ForegroundColor Red
-    Write-Host "   $($_.Exception.Message)" -ForegroundColor Yellow
-    
-    if (-not $Silencioso) {
-        Write-Host ""
-        Write-Host "💡 Possíveis soluções:" -ForegroundColor Cyan
-        Write-Host "   - Verificar se está executando como Administrador" -ForegroundColor White
-        Write-Host "   - Tentar novamente com -Forcar" -ForegroundColor White
-        Write-Host "   - Remover manualmente via taskschd.msc" -ForegroundColor White
-    }
+    Write-Host "ERRO:" -ForegroundColor Red
+    Write-Host "$($_.Exception.Message)" -ForegroundColor Yellow
 }
 
 if (-not $Silencioso) {
