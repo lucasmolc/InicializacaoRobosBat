@@ -1,4 +1,26 @@
-# Sistema de Inicialização Automática de Robôs Python
+# Sist## Estrutura de Arquivos
+
+### Arquivos Principais (Raiz)
+- `inicializar_robo.bat` - **Script principal de execução**
+  - Todas as configurações internas (sem arquivos externos)
+  - Sistema completo de logs com timestamp
+  - Verificação Git automática (fetch + pull quando necessário) 
+  - Validação robusta de configurações e arquivos
+  - Execução segura com códigos de saída apropriados
+
+- `configurar_inicializacao.bat` - **Menu interativo para inicialização automática** ⭐
+  - Interface amigável para todas as operações
+  - Verificação automática de privilégios de administrador
+  - Gerenciamento completo da configuração
+
+### Pasta `scripts/` (Scripts Auxiliares)
+**⚠️ NÃO execute estes arquivos diretamente - use o menu .bat**
+- `configurar_inicializacao.ps1` - Configuração automática via PowerShell
+- `verificar_inicializacao.ps1` - Verificação e teste da configuração
+- `remover_inicializacao.ps1` - Remoção completa da configuração
+
+### Documentação
+- `README.md` - Este arquivo (documentação completa)nicialização Automática de Robôs Python
 
 Script otimizado para inicializar automaticamente aplicações Python com verificação prévia de atualizações Git. 
 
@@ -6,12 +28,21 @@ Script otimizado para inicializar automaticamente aplicações Python com verifi
 
 ## Arquivo Principal
 
-- `inicializar_robo.bat` - **Script único e otimizado** 
+- `inicializar_robo.bat` - **Script principal de execução**
   - Todas as configurações internas (sem arquivos externos)
   - Sistema completo de logs com timestamp
   - Verificação Git automática (fetch + pull quando necessário) 
   - Validação robusta de configurações e arquivos
   - Execução segura com códigos de saída apropriados
+
+- `configurar_inicializacao.bat` - **Menu interativo para inicialização automática**
+  - Interface amigável para todas as operações
+  - Verificação automática de privilégios de administrador
+  - Gerenciamento completo da configuração
+
+- `scripts/` - **Scripts PowerShell auxiliares** (não executar diretamente)
+  - Scripts de configuração, verificação e remoção
+  - Executados automaticamente via menu .bat
 
 ## Como Usar
 
@@ -144,14 +175,54 @@ set "VERBOSE_OUTPUT=true"
 - ✅ Funciona mesmo sem usuário logado
 
 **📋 Scripts de Gerenciamento:**
-- `configurar_inicializacao.bat` - Menu interativo completo
-- `configurar_inicializacao.ps1` - Configuração automática  
-- `verificar_inicializacao.ps1` - Verificação e teste
-- `remover_inicializacao.ps1` - Remoção completa
-- `INICIALIZACAO_WINDOWS.md` - Guia detalhado
+- `configurar_inicializacao.bat` - Menu interativo completo (**USE ESTE**)
+- `scripts/configurar_inicializacao.ps1` - Configuração automática  
+- `scripts/verificar_inicializacao.ps1` - Verificação e teste
+- `scripts/remover_inicializacao.ps1` - Remoção completa
 
 ### Agendamento Manual com Task Scheduler
-Consulte `INICIALIZACAO_WINDOWS.md` para instruções detalhadas de configuração manual.
+
+#### Configuração Passo-a-Passo:
+
+1. **Abrir Agendador de Tarefas**
+   - Pressione `Win + R` → digite `taskschd.msc` → Enter
+
+2. **Criar Tarefa**
+   - Clique em "Criar Tarefa..." (não "Criar Tarefa Básica")
+   - Nome: `Inicializacao Robo Python`
+   - ✅ Marque "Executar com privilégios mais altos"
+   - ✅ Marque "Executar estando o usuário conectado ou não"
+
+3. **Configurar Disparadores**
+   - Aba "Disparadores" → "Novo..."
+   - Iniciar a tarefa: "Na inicialização"
+   - Atrasar tarefa por: 2 minutos
+
+4. **Configurar Ações**
+   - Aba "Ações" → "Nova..."
+   - Programa/script: `C:\Projects\InicializacaoRobosBat\inicializar_robo.bat`
+
+5. **Configurar Configurações**
+   - ✅ "Permitir que a tarefa seja executada sob demanda"
+   - ✅ "Se a tarefa falhar, reiniciar a cada: 1 minuto" (até 3 vezes)
+
+## Métodos Alternativos de Inicialização
+
+### Método 1: Serviço do Windows (NSSM)
+```cmd
+# Baixar NSSM de https://nssm.cc/download
+cd C:\nssm\win64
+nssm install "RoboPython" "C:\Projects\InicializacaoRobosBat\inicializar_robo.bat"
+nssm set "RoboPython" Start SERVICE_AUTO_START
+nssm start "RoboPython"
+```
+
+### Método 2: Registro do Windows
+1. `Win + R` → `regedit` → Enter
+2. Navegar: `HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run`
+3. Criar entrada: Nome=`RoboPythonInit`, Valor=caminho do .bat
+
+⚠️ **Nota:** Registro não executa com privilégios de admin automaticamente
 
 ## Troubleshooting
 

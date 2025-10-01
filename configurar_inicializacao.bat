@@ -34,7 +34,7 @@ echo 1. Configurar inicializacao automatica
 echo 2. Verificar configuracao atual
 echo 3. Testar execucao da tarefa
 echo 4. Remover inicializacao automatica
-echo 5. Abrir guia de configuracao
+echo 5. Abrir documentacao (README)
 echo 6. Sair
 echo.
 set /p opcao="Digite sua opcao (1-6): "
@@ -55,7 +55,7 @@ cls
 echo.
 echo [INFO] Configurando inicializacao automatica...
 echo.
-powershell -ExecutionPolicy Bypass -File "%~dp0configurar_inicializacao.ps1"
+powershell -ExecutionPolicy Bypass -File "%~dp0scripts\configurar_inicializacao.ps1"
 echo.
 pause
 goto menu
@@ -65,7 +65,7 @@ cls
 echo.
 echo [INFO] Verificando configuracao atual...
 echo.
-powershell -ExecutionPolicy Bypass -File "%~dp0verificar_inicializacao.ps1" -Detalhado
+powershell -ExecutionPolicy Bypass -File "%~dp0scripts\verificar_inicializacao.ps1" -Detalhado
 echo.
 pause
 goto menu
@@ -75,7 +75,7 @@ cls
 echo.
 echo [INFO] Testando execucao da tarefa...
 echo.
-powershell -ExecutionPolicy Bypass -File "%~dp0verificar_inicializacao.ps1" -Testar
+powershell -ExecutionPolicy Bypass -File "%~dp0scripts\verificar_inicializacao.ps1" -Testar
 echo.
 pause
 goto menu
@@ -85,7 +85,7 @@ cls
 echo.
 echo [INFO] Removendo inicializacao automatica...
 echo.
-powershell -ExecutionPolicy Bypass -File "%~dp0remover_inicializacao.ps1"
+powershell -ExecutionPolicy Bypass -File "%~dp0scripts\remover_inicializacao.ps1"
 echo.
 pause
 goto menu
@@ -93,12 +93,12 @@ goto menu
 :guia
 cls
 echo.
-echo [INFO] Abrindo guia de configuracao...
+echo [INFO] Abrindo documentacao...
 echo.
-if exist "%~dp0INICIALIZACAO_WINDOWS.md" (
-    start "" "%~dp0INICIALIZACAO_WINDOWS.md"
+if exist "%~dp0README.md" (
+    start "" "%~dp0README.md"
 ) else (
-    echo [ERRO] Arquivo de guia nao encontrado: INICIALIZACAO_WINDOWS.md
+    echo [ERRO] Arquivo README.md nao encontrado
 )
 echo.
 pause
