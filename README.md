@@ -113,6 +113,7 @@ set "PYTHON_SCRIPT=main.py"
 set "PYTHON_APP_DIR=C:\caminho\para\sua\aplicacao"  :: ← EDITE ESTE
 set "PYTHON_SCRIPT=main.py"                        :: ← EDITE SE NECESSÁRIO
 set "PYTHON_EXECUTABLE=python"                     :: ← Base (será sobrescrito pelo venv)
+set "ENVIRONMENT_PARAM=PRD"                        :: ← Parâmetro de ambiente (PRD/DEV/TEST)
 set "VENV_NAME=venv"                               :: ← Nome do ambiente virtual
 set "REQUIREMENTS_FILE=requirements.txt"           :: ← Arquivo de dependências
 set "GIT_BRANCH=main"                              :: ← EDITE SE NECESSÁRIO
@@ -195,11 +196,30 @@ set "REQUIREMENTS_FILE=requirements.txt"           :: Arquivo de dependências
 set "AUTO_INSTALL_REQUIREMENTS=true"              :: Instalar automaticamente
 ```
 
+### Configurações de Ambiente de Execução
+```batch
+set "ENVIRONMENT_PARAM=PRD"                        :: Parâmetro enviado para aplicação
+```
+
+**🎯 Parâmetros Sugeridos:**
+- **`PRD`** - Ambiente de Produção (recomendado para inicialização automática)
+- **`DEV`** - Ambiente de Desenvolvimento  
+- **`TEST`** - Ambiente de Testes
+- **`HOMOLOG`** - Ambiente de Homologação
+
 **🔧 Como Funciona:**
-1. **Detecção:** Verifica se ambiente virtual existe na aplicação
-2. **Criação:** Cria automaticamente se não encontrar
-3. **Ativação:** Usa sempre o Python do ambiente virtual
-4. **Dependências:** Instala/atualiza via `requirements.txt` automaticamente
+1. **Ambiente Virtual:** 
+   - Detecção → Criação → Ativação → Dependências automáticas
+2. **Execução da Aplicação:**
+   ```cmd
+   python main.py PRD
+   ```
+3. **Recepção no Python:**
+   ```python
+   import sys
+   ambiente = sys.argv[1] if len(sys.argv) > 1 else 'DEV'
+   print(f"Executando em ambiente: {ambiente}")
+   ```
 
 ### Configurações Opcionais
 ```batch
@@ -218,11 +238,12 @@ set "VERBOSE_OUTPUT=false"
 
 ## Exemplos de Configuração
 
-### Exemplo 1: Aplicação com Ambiente Virtual (Recomendado)
+### Exemplo 1: Aplicação Completa (Recomendado)
 ```batch
 set "PYTHON_APP_DIR=C:\Caminho\Para\MeuRobo"
 set "PYTHON_SCRIPT=main.py"
 set "PYTHON_EXECUTABLE=python"
+set "ENVIRONMENT_PARAM=PRD"
 set "VENV_NAME=venv"
 set "REQUIREMENTS_FILE=requirements.txt"
 set "AUTO_INSTALL_REQUIREMENTS=true"
@@ -231,11 +252,12 @@ set "PAUSE_ON_EXIT=true"
 set "VERBOSE_OUTPUT=true"
 ```
 
-### Exemplo 2: Execução Automática (Servidor/Produção)
+### Exemplo 2: Servidor/Produção (Silencioso)
 ```batch
 set "PYTHON_APP_DIR=C:\Caminho\Para\MeuRobo"
 set "PYTHON_SCRIPT=orquestrador_fila.py"
 set "PYTHON_EXECUTABLE=python"
+set "ENVIRONMENT_PARAM=PRD"
 set "VENV_NAME=venv"
 set "AUTO_INSTALL_REQUIREMENTS=true"
 set "GIT_BRANCH=master"
@@ -243,11 +265,14 @@ set "PAUSE_ON_EXIT=false"
 set "VERBOSE_OUTPUT=false"
 ```
 
-### Exemplo 3: Projeto com Branch Específico
+### Exemplo 3: Ambiente de Desenvolvimento
 ```batch
 set "PYTHON_APP_DIR=C:\Caminho\Para\RaspagemInput"
 set "PYTHON_SCRIPT=main.py"
 set "PYTHON_EXECUTABLE=python"
+set "ENVIRONMENT_PARAM=DEV"
+set "VENV_NAME=venv"
+set "AUTO_INSTALL_REQUIREMENTS=true"
 set "GIT_BRANCH=development"
 set "PAUSE_ON_EXIT=true"
 set "VERBOSE_OUTPUT=true"

@@ -10,6 +10,7 @@ setlocal EnableDelayedExpansion
 set "PYTHON_APP_DIR=C:\Repositorios\RaspagemInput"
 set "PYTHON_SCRIPT=main.py"
 set "PYTHON_EXECUTABLE=python"
+set "ENVIRONMENT_PARAM=PRD"
 set "VENV_NAME=venv"
 set "REQUIREMENTS_FILE=requirements.txt"
 set "GIT_BRANCH=main"
@@ -274,12 +275,12 @@ if "%AUTO_INSTALL_REQUIREMENTS%"=="true" (
 
 if "%VERBOSE_OUTPUT%"=="true" (
     echo.
-    echo [INFO] Iniciando aplicacao Python...
+    echo [INFO] Iniciando aplicacao Python com parametro: %ENVIRONMENT_PARAM%
 )
-echo [%date% %time%] [INFO] Iniciando aplicacao Python... >> "%LOG_FILE%"
+echo [%date% %time%] [INFO] Iniciando aplicacao Python com parametro: %ENVIRONMENT_PARAM% >> "%LOG_FILE%"
 
-:: Executar a aplicacao Python
-%PYTHON_EXECUTABLE% "%PYTHON_SCRIPT%"
+:: Executar a aplicacao Python com parametro de ambiente
+%PYTHON_EXECUTABLE% "%PYTHON_SCRIPT%" %ENVIRONMENT_PARAM%
 set "exit_code=%errorlevel%"
 
 echo.
