@@ -10,9 +10,12 @@ setlocal EnableDelayedExpansion
 set "PYTHON_APP_DIR=C:\Repositorios\RaspagemInput"
 set "PYTHON_SCRIPT=main.py"
 set "PYTHON_EXECUTABLE=python"
+set "VENV_NAME=venv"
+set "REQUIREMENTS_FILE=requirements.txt"
 set "GIT_BRANCH=main"
 set "PAUSE_ON_EXIT=true"
 set "VERBOSE_OUTPUT=true"
+set "AUTO_INSTALL_REQUIREMENTS=true"
 :: ===================================================
 
 :: Configurar arquivo de log com timestamp
@@ -153,6 +156,120 @@ if %errorlevel% neq 0 (
     )
     popd
     exit /b 9009
+)
+
+:: ========================================
+:: CONFIGURACAO DO AMBIENTE VIRTUAL (VENV)
+:: ========================================
+
+:: Definir caminhos do ambiente virtual
+set "VENV_PATH=%CD%\%VENV_NAME%"
+set "VENV_PYTHON=%VENV_PATH%\Scripts\python.exe"
+set "VENV_PIP=%VENV_PATH%\Scripts\pip.exe"
+set "VENV_ACTIVATE=%VENV_PATH%\Scripts\activate.bat"
+
+:: Verificar se ambiente virtual existe
+if "%VERBOSE_OUTPUT%"=="true" (
+    echo [INFO] Verificando ambiente virtual...
+)
+echo [%date% %time%] [INFO] Verificando ambiente virtual em: %VENV_PATH% >> "%LOG_FILE%"
+
+if not exist "%VENV_PATH%" (
+    if "%VERBOSE_OUTPUT%"=="true" (
+        echo [INFO] Ambiente virtual nao encontrado. Criando...
+    )
+    echo [%date% %time%] [INFO] Criando ambiente virtual: %VENV_NAME% >> "%LOG_FILE%"
+    
+    %PYTHON_EXECUTABLE% -m venv "%VENV_PATH%" 2>>"%LOG_FILE%"
+    if %errorlevel% neq 0 (
+        echo [ERRO] Falha ao criar ambiente virtual
+        echo [%date% %time%] [ERRO] Falha ao criar ambiente virtual >> "%LOG_FILE%"
+        if "%PAUSE_ON_EXIT%"=="true" (
+            echo.
+            echo Pressione qualquer tecla para continuar...
+            pause >nul
+        )
+        popd
+        exit /b 1
+    )
+    
+    if "%VERBOSE_OUTPUT%"=="true" (
+        echo [SUCESSO] Ambiente virtual criado com sucesso!
+    )
+    echo [%date% %time%] [SUCESSO] Ambiente virtual criado: %VENV_PATH% >> "%LOG_FILE%"
+) else (
+    if "%VERBOSE_OUTPUT%"=="true" (
+        echo [INFO] Ambiente virtual encontrado: %VENV_NAME%
+    )
+    echo [%date% %time%] [INFO] Ambiente virtual existente encontrado >> "%LOG_FILE%"
+)
+
+:: Verificar se o ambiente virtual esta funcionando
+if not exist "%VENV_PYTHON%" (
+    echo [ERRO] Ambiente virtual corrompido - Python nao encontrado
+    echo [%date% %time%] [ERRO] Ambiente virtual corrompido em: %VENV_PATH% >> "%LOG_FILE%"
+    if "%PAUSE_ON_EXIT%"=="true" (
+        echo.
+        echo Pressione qualquer tecla para continuar...
+        pause >nul
+    )
+    popd
+    exit /b 1
+)
+
+:: Atualizar PYTHON_EXECUTABLE para usar o ambiente virtual
+set "PYTHON_EXECUTABLE=%VENV_PYTHON%"
+
+if "%VERBOSE_OUTPUT%"=="true" (
+    echo [INFO] Usando Python do ambiente virtual: %VENV_NAME%
+)
+echo [%date% %time%] [INFO] Python configurado para ambiente virtual >> "%LOG_FILE%"
+
+:: ========================================
+:: INSTALACAO DE DEPENDENCIAS
+:: ========================================
+
+if "%AUTO_INSTALL_REQUIREMENTS%"=="true" (
+    if exist "%REQUIREMENTS_FILE%" (
+        if "%VERBOSE_OUTPUT%"=="true" (
+            echo [INFO] Verificando e instalando dependencias...
+        )
+        echo [%date% %time%] [INFO] Verificando requirements.txt >> "%LOG_FILE%"
+        
+        :: Atualizar pip primeiro
+        if "%VERBOSE_OUTPUT%"=="true" (
+            echo [INFO] Atualizando pip...
+        )
+        echo [%date% %time%] [INFO] Atualizando pip no ambiente virtual >> "%LOG_FILE%"
+        "%VENV_PYTHON%" -m pip install --upgrade pip >>"%LOG_FILE%" 2>&1
+        
+        :: Instalar dependencias
+        if "%VERBOSE_OUTPUT%"=="true" (
+            echo [INFO] Instalando dependencias do requirements.txt...
+        )
+        echo [%date% %time%] [INFO] Instalando dependencias: %REQUIREMENTS_FILE% >> "%LOG_FILE%"
+        
+        "%VENV_PYTHON%" -m pip install -r "%REQUIREMENTS_FILE%" >>"%LOG_FILE%" 2>&1
+        if %errorlevel% equ 0 (
+            if "%VERBOSE_OUTPUT%"=="true" (
+                echo [SUCESSO] Dependencias instaladas com sucesso!
+            )
+            echo [%date% %time%] [SUCESSO] Todas as dependencias foram instaladas >> "%LOG_FILE%"
+        ) else (
+            echo [AVISO] Algumas dependencias podem ter falhado na instalacao
+            echo [%date% %time%] [AVISO] Verificar logs - algumas dependencias falharam >> "%LOG_FILE%"
+        )
+    ) else (
+        if "%VERBOSE_OUTPUT%"=="true" (
+            echo [AVISO] Arquivo requirements.txt nao encontrado
+        )
+        echo [%date% %time%] [AVISO] requirements.txt nao encontrado em: %CD% >> "%LOG_FILE%"
+    )
+) else (
+    if "%VERBOSE_OUTPUT%"=="true" (
+        echo [INFO] Instalacao automatica de dependencias desabilitada
+    )
+    echo [%date% %time%] [INFO] AUTO_INSTALL_REQUIREMENTS=false - pulando dependencias >> "%LOG_FILE%"
 )
 
 if "%VERBOSE_OUTPUT%"=="true" (

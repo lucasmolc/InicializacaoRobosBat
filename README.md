@@ -112,10 +112,13 @@ set "PYTHON_SCRIPT=main.py"
 
 set "PYTHON_APP_DIR=C:\caminho\para\sua\aplicacao"  :: ← EDITE ESTE
 set "PYTHON_SCRIPT=main.py"                        :: ← EDITE SE NECESSÁRIO
-set "PYTHON_EXECUTABLE=python"                     :: ← PADRÃO: OK
+set "PYTHON_EXECUTABLE=python"                     :: ← Base (será sobrescrito pelo venv)
+set "VENV_NAME=venv"                               :: ← Nome do ambiente virtual
+set "REQUIREMENTS_FILE=requirements.txt"           :: ← Arquivo de dependências
 set "GIT_BRANCH=main"                              :: ← EDITE SE NECESSÁRIO
 set "PAUSE_ON_EXIT=true"                           :: ← PADRÃO: OK
 set "VERBOSE_OUTPUT=true"                          :: ← PADRÃO: OK
+set "AUTO_INSTALL_REQUIREMENTS=true"              :: ← Instalar dependências automaticamente
 ```
 
 **🎯 Exemplo de Configuração Real:**
@@ -152,6 +155,14 @@ Para execução automática com o Windows:
 - **Resolução automática de problemas de ownership** (dubious ownership)
 - Configuração automática de `safe.directory` para execução como SYSTEM
 
+### ✅ Ambiente Virtual (VENV) Automático
+- **Criação automática** do ambiente virtual se não existir
+- **Isolamento completo** das dependências Python
+- **Compatibilidade garantida** entre diferentes máquinas
+- **Instalação automática** de dependências via `requirements.txt`
+- **Atualização automática** do pip no ambiente virtual
+- **Verificação de integridade** do ambiente virtual
+
 ### ✅ Sistema de Logs Inteligente
 - Logs detalhados com timestamp em `logs/inicializacao_AAAAMMDD_HHMMSS.log`
 - Saída no console configurável (VERBOSE_OUTPUT)
@@ -177,6 +188,19 @@ set "PYTHON_APP_DIR=C:\Caminho\Para\SuaAplicacao"  :: Caminho da aplicação
 set "PYTHON_SCRIPT=main.py"                        :: Arquivo Python principal
 ```
 
+### Configurações do Ambiente Virtual
+```batch
+set "VENV_NAME=venv"                               :: Nome do ambiente virtual
+set "REQUIREMENTS_FILE=requirements.txt"           :: Arquivo de dependências
+set "AUTO_INSTALL_REQUIREMENTS=true"              :: Instalar automaticamente
+```
+
+**🔧 Como Funciona:**
+1. **Detecção:** Verifica se ambiente virtual existe na aplicação
+2. **Criação:** Cria automaticamente se não encontrar
+3. **Ativação:** Usa sempre o Python do ambiente virtual
+4. **Dependências:** Instala/atualiza via `requirements.txt` automaticamente
+
 ### Configurações Opcionais
 ```batch
 set "PYTHON_EXECUTABLE=python"            :: Executável Python
@@ -194,22 +218,26 @@ set "VERBOSE_OUTPUT=false"
 
 ## Exemplos de Configuração
 
-### Exemplo 1: Aplicação Simples
+### Exemplo 1: Aplicação com Ambiente Virtual (Recomendado)
 ```batch
 set "PYTHON_APP_DIR=C:\Caminho\Para\MeuRobo"
 set "PYTHON_SCRIPT=main.py"
 set "PYTHON_EXECUTABLE=python"
+set "VENV_NAME=venv"
+set "REQUIREMENTS_FILE=requirements.txt"
+set "AUTO_INSTALL_REQUIREMENTS=true"
 set "GIT_BRANCH=main"
-set "VIRTUAL_ENV_PATH="
 set "PAUSE_ON_EXIT=true"
 set "VERBOSE_OUTPUT=true"
 ```
 
-### Exemplo 2: Execução Automática (Sem Interação)
+### Exemplo 2: Execução Automática (Servidor/Produção)
 ```batch
 set "PYTHON_APP_DIR=C:\Caminho\Para\MeuRobo"
 set "PYTHON_SCRIPT=orquestrador_fila.py"
 set "PYTHON_EXECUTABLE=python"
+set "VENV_NAME=venv"
+set "AUTO_INSTALL_REQUIREMENTS=true"
 set "GIT_BRANCH=master"
 set "PAUSE_ON_EXIT=false"
 set "VERBOSE_OUTPUT=false"
@@ -453,6 +481,33 @@ PowerShell -Command "Set-ExecutionPolicy RemoteSigned -Force"
 4. **Logs da aplicação:** Verificar logs próprios da aplicação Python
 5. **Teste com usuário:** Script funciona quando executado manualmente pelo usuário?
 
+### Problemas do Ambiente Virtual
+
+#### Problema: ModuleNotFoundError mesmo com requirements.txt
+```
+ModuleNotFoundError: No module named 'pyodbc'
+```
+**Solução Automática:** O ambiente virtual instala dependências automaticamente
+**Verificação Manual:**
+```cmd
+cd C:\Caminho\Para\SuaAplicacao
+venv\Scripts\activate
+pip list
+pip install -r requirements.txt
+```
+
+#### Problema: Ambiente virtual corrompido
+```
+[ERRO] Ambiente virtual corrompido - Python nao encontrado
+```
+**Solução:**
+1. **Automática:** Delete a pasta `venv` - será recriada automaticamente
+2. **Manual:** `rmdir /s venv` → executar script novamente
+
+#### Problema: Pip desatualizado ou falhas na instalação
+**Solução Automática:** Script atualiza pip automaticamente antes das instalações
+**Verificação:** Consultar logs em `logs/inicializacao_*.log` para detalhes específicos
+
 #### Problema: Git "dubious ownership" quando executado como SYSTEM
 ```
 fatal: detected dubious ownership in repository at 'C:/Caminho/Para/Repo'
@@ -554,7 +609,11 @@ Exemplo de log:
 - **v2.0**: Sistema completo com menu interativo e PowerShell
 - **v1.x**: Script básico sem automação de inicialização
 
-### Melhorias v2.1 - Portabilidade Total
+### Melhorias v2.2 - Ambiente Virtual Automático
+- ✅ **Ambiente Virtual:** Criação e gerenciamento automático do venv
+- ✅ **Dependências Automáticas:** Instalação via requirements.txt
+- ✅ **Isolamento Completo:** Cada aplicação com suas próprias dependências
+- ✅ **Compatibilidade Garantida:** Mesma versão de bibliotecas em todas as máquinas
 - ✅ **Caminhos Dinâmicos:** Scripts detectam localização automaticamente
 - ✅ **Portabilidade:** Funciona em qualquer máquina sem reconfiguração
 - ✅ **Instalação Simples:** Apenas copiar pasta + editar 1 linha
