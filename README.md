@@ -440,6 +440,19 @@ PowerShell -Command "Set-ExecutionPolicy RemoteSigned -Force"
 - Verificar se caminhos são absolutos (não relativos)
 - Garantir que conta SYSTEM tem acesso aos arquivos
 
+#### Problema: Aplicação Python retorna código 1
+```
+[INFO] Aplicacao finalizada com codigo: 1
+[AVISO] Aplicacao finalizada com codigo de erro: 1
+```
+**Causa:** Erro interno na aplicação Python (não no script .bat)
+**Investigação:**
+1. **Executar manualmente:** `cd C:\Repositorios\RaspagemInput && python main.py`
+2. **Verificar dependências:** Módulos Python faltando ou desatualizados
+3. **Permissões de arquivo:** SYSTEM pode não ter acesso a arquivos específicos
+4. **Logs da aplicação:** Verificar logs próprios da aplicação Python
+5. **Teste com usuário:** Script funciona quando executado manualmente pelo usuário?
+
 #### Problema: Git "dubious ownership" quando executado como SYSTEM
 ```
 fatal: detected dubious ownership in repository at 'C:/Caminho/Para/Repo'
@@ -489,7 +502,7 @@ logs/inicializacao_AAAAMMDD_HHMMSS.log
 | Código | Significado | Solução |
 |--------|-------------|---------|
 | **0** | Sucesso | ✅ Aplicação executada normalmente |
-| **1** | Erro geral | Verificar logs para detalhes específicos |
+| **1** | Erro da aplicação Python | Problema no código Python - verificar logs da aplicação |
 | **9009** | Comando não encontrado | Python não está no PATH - instalar/configurar Python |
 | **1** (Git) | Erro de Git | Problemas de repositório, ownership ou conectividade |
 | **125** | Erro de sintaxe Python | Verificar código Python da aplicação |
