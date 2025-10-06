@@ -7,7 +7,7 @@
 setlocal EnableDelayedExpansion
 
 :: ============ CONFIGURACOES - EDITE AQUI ============
-set "PYTHON_APP_DIR=C:\Projects\RaspagemInput"
+set "PYTHON_APP_DIR=C:\Repositorios\RaspagemInput"
 set "PYTHON_SCRIPT=main.py"
 set "PYTHON_EXECUTABLE=python"
 set "ENVIRONMENT_PARAM=PRD"
