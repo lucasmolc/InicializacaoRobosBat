@@ -5,7 +5,7 @@
 :: ========================================
 
 :: Configurar console
-title Automação Python
+title Automacao Python
 
 setlocal EnableDelayedExpansion
 
