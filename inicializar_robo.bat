@@ -6,7 +6,6 @@
 
 :: Configurar console
 title Automação Python
-mode con cols=120 lines=40
 
 setlocal EnableDelayedExpansion
 
@@ -43,9 +42,6 @@ set "LOG_FILE=%LOG_FILE: =0%"
 
 :: Criar diretorio de logs se nao existir
 if not exist "%~dp0logs" mkdir "%~dp0logs"
-
-:: Maximizar janela do console
-powershell -WindowStyle Hidden -Command "Add-Type -TypeDefinition 'using System; using System.Diagnostics; using System.Runtime.InteropServices; public class Win { [DllImport(\"user32.dll\")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow); } '; $p = Get-Process -Id $PID; [Win]::ShowWindow($p.MainWindowHandle, 3) | Out-Null" 2>nul >nul
 
 :: Iniciar log
 echo ========================================== >> "%LOG_FILE%"
