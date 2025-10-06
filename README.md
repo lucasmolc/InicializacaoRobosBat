@@ -154,7 +154,7 @@ Para execução automática com o Windows:
 - Continua mesmo se não for um repositório Git
 - Suporte a branches específicos
 - **Resolução automática de problemas de ownership** (dubious ownership)
-- Configuração automática de `safe.directory` para execução como SYSTEM
+- Configuração automática de `safe.directory` para execução no login
 
 ### ✅ Ambiente Virtual (VENV) Automático
 - **Criação automática** do ambiente virtual se não existir
@@ -288,8 +288,8 @@ set "VERBOSE_OUTPUT=true"
 3. Reinicie para testar
 
 **⚙️ Recursos da Inicialização Automática:**
-- ✅ Execução com privilégios de administrador (conta SYSTEM)
-- ✅ Atraso de 2 minutos após boot (aguarda sistema carregar)
+- ✅ Execução no login do usuário (sem delay)
+- ✅ Execução como usuário atual com privilégios elevados
 - ✅ Reinicialização automática em falhas (até 3 tentativas, intervalo 1 minuto)
 - ✅ Execução mesmo em modo bateria
 - ✅ Continuidade mesmo se desconectar da fonte
@@ -298,7 +298,7 @@ set "VERBOSE_OUTPUT=true"
 - ✅ Funciona mesmo sem usuário logado
 
 **🔧 Configurações Técnicas Aplicadas:**
-- **Usuário:** SYSTEM (máximo privilégio)
+- **Usuário:** Usuário atual (privilégios elevados)
 - **Tipo de Logon:** ServiceAccount
 - **Nível de Execução:** Highest (administrador)
 - **Política de Bateria:** Permitir início e continuidade
@@ -360,7 +360,7 @@ PowerShell -ExecutionPolicy Bypass -File scripts\remover_inicializacao.ps1 -Forc
 3. **Configurar Disparadores**
    - Aba "Disparadores" → "Novo..."
    - Iniciar a tarefa: "Na inicialização"
-   - Atrasar tarefa por: 2 minutos
+   - Disparador: No logon do usuário
 
 4. **Configurar Ações**
    - Aba "Ações" → "Nova..."
@@ -491,7 +491,7 @@ PowerShell -Command "Set-ExecutionPolicy RemoteSigned -Force"
 - Verificar logs em `logs/inicializacao_*.log`
 - Testar script manualmente: executar `inicializar_robo.bat`  
 - Verificar se caminhos são absolutos (não relativos)
-- Garantir que conta SYSTEM tem acesso aos arquivos
+- Garantir que usuário atual tem acesso aos arquivos
 
 #### Problema: Aplicação Python retorna código 1
 ```
@@ -502,7 +502,7 @@ PowerShell -Command "Set-ExecutionPolicy RemoteSigned -Force"
 **Investigação:**
 1. **Executar manualmente:** `cd C:\Repositorios\RaspagemInput && python main.py`
 2. **Verificar dependências:** Módulos Python faltando ou desatualizados
-3. **Permissões de arquivo:** SYSTEM pode não ter acesso a arquivos específicos
+3. **Permissões de arquivo:** Usuário pode não ter acesso a arquivos específicos
 4. **Logs da aplicação:** Verificar logs próprios da aplicação Python
 5. **Teste com usuário:** Script funciona quando executado manualmente pelo usuário?
 
@@ -533,11 +533,11 @@ pip install -r requirements.txt
 **Solução Automática:** Script atualiza pip automaticamente antes das instalações
 **Verificação:** Consultar logs em `logs/inicializacao_*.log` para detalhes específicos
 
-#### Problema: Git "dubious ownership" quando executado como SYSTEM
+#### Problema: Git "dubious ownership"
 ```
 fatal: detected dubious ownership in repository at 'C:/Caminho/Para/Repo'
 ```
-**Causa:** Windows Task Scheduler executa como SYSTEM, mas repositório pertence ao usuário
+**Causa:** Git pode apresentar problemas de ownership dependendo da configuração
 **Solução Automática:** O script resolve automaticamente configurando `git config --global --add safe.directory`
 **Verificação Manual:**
 ```cmd
@@ -614,7 +614,7 @@ Exemplo de log:
 ## Segurança e Melhores Práticas
 
 ### Considerações de Segurança
-- Scripts executam com privilégios SYSTEM (máximo nível)
+- Scripts executam com privilégios elevados do usuário
 - Sempre revise configurações antes de aplicar
 - Use caminhos absolutos para evitar problemas de contexto
 - Mantenha logs para auditoria de execuções
@@ -644,7 +644,7 @@ Exemplo de log:
 - ✅ **Instalação Simples:** Apenas copiar pasta + editar 1 linha
 - ✅ **Compatibilidade:** Windows 10/11, qualquer diretório
 - ✅ **Teste Automático:** Funcionalidade de teste integrada ao menu
-- ✅ **Git Ownership Fix:** Resolução automática de problemas de execução como SYSTEM
+- ✅ **Git Ownership Fix:** Resolução automática de problemas de ownership
 
 ### Atualizações Futuras
 Para manter o sistema atualizado:

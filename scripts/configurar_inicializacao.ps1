@@ -2,8 +2,7 @@
 # Execute este script como Administrador
 
 param(
-    [switch]$Teste,
-    [int]$AtrasoMinutos = 2
+    [switch]$Teste
 )
 
 # Definir caminho dinamico automaticamente
@@ -47,26 +46,27 @@ try {
     # Criar acao da tarefa
     $acao = New-ScheduledTaskAction -Execute $CaminhoScript
 
-    # Criar disparador
-    $disparador = New-ScheduledTaskTrigger -AtStartup
-    $disparador.Delay = "PT$($AtrasoMinutos)M"
+    # Criar disparador - executa no login do usuario
+    $disparador = New-ScheduledTaskTrigger -AtLogOn
 
-    # Configurar principais definicoes
-    $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+    # Configurar principais definicoes - executa como usuario atual
+    $usuarioAtual = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
+    $principal = New-ScheduledTaskPrincipal -UserId $usuarioAtual -LogonType Interactive -RunLevel Highest
 
     # Configuracoes da tarefa
     $configuracoes = New-ScheduledTaskSettingsSet -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -RestartCount 3 -RestartInterval (New-TimeSpan -Minutes 1)
 
     # Registrar a tarefa
     Write-Host "Criando tarefa agendada..." -ForegroundColor Blue
-    Register-ScheduledTask -TaskName $NomeTarefa -Action $acao -Trigger $disparador -Principal $principal -Settings $configuracoes -Description "Executa automaticamente o robo Python na inicializacao"
+    Register-ScheduledTask -TaskName $NomeTarefa -Action $acao -Trigger $disparador -Principal $principal -Settings $configuracoes -Description "Executa automaticamente o robo Python no login do usuario"
 
     Write-Host "Tarefa criada com sucesso!" -ForegroundColor Green
     Write-Host ""
     Write-Host "Informacoes da Tarefa:" -ForegroundColor Cyan
     Write-Host "  Nome: $NomeTarefa" -ForegroundColor White
     Write-Host "  Arquivo: $CaminhoScript" -ForegroundColor White
-    Write-Host "  Atraso: $AtrasoMinutos minutos apos boot" -ForegroundColor White
+    Write-Host "  Usuario: $usuarioAtual" -ForegroundColor White
+    Write-Host "  Disparador: Login do usuario (sem delay)" -ForegroundColor White
     Write-Host ""
 
     # Testar se solicitado
