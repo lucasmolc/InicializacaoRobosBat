@@ -55,7 +55,33 @@ powershell -ExecutionPolicy Bypass -File "%~dp0scripts\configurar_inicializacao.
 set "LOG_FILE=%~dp0logs\inicializacao_AAAAMMDD_HHMMSS.log"
 ```
 
-### 📋 **Apenas UMA Configuração Manual Necessária**
+### 🌐 **Portabilidade Entre Máquinas**
+
+### **Detecção Automática de Diretório:**
+O sistema detecta automaticamente o diretório correto baseado na localização do script:
+
+```
+Exemplos de funcionamento:
+• C:\Projects\InicializacaoRobosBat\ → C:\Projects\RaspagemInput\
+• C:\Repositorios\InicializacaoRobosBat\ → C:\Repositorios\RaspagemInput\
+• D:\MeusProjetos\InicializacaoRobosBat\ → D:\MeusProjetos\RaspagemInput\
+```
+
+**Vantagens:**
+- ✅ **Zero Configuração:** Funciona imediatamente após cópia
+- ✅ **Múltiplas Máquinas:** Mesmo script funciona em qualquer computador
+- ✅ **Diferentes Drives:** Suporta C:\, D:\, E:\, etc.
+- ✅ **Fallback Inteligente:** Se não encontrar padrão, usa diretório pai
+
+## 🖥️ **Configurações do Console**
+
+### **Interface Otimizada:**
+- **📺 Tela Cheia:** Console maximiza automaticamente na execução
+- **🏷️ Título Personalizado:** "Automação Python" aparece na barra de título
+- **📏 Dimensões:** 120 colunas x 40 linhas para melhor visualização
+- **🎯 Visibilidade:** Interface clara para monitoramento do processo
+
+## 📋 **Arquivos do Sistema**
 Você precisa editar **apenas** o arquivo `inicializar_robo.bat` uma vez:
 ```batch
 :: ÚNICO local que precisa ser editado para sua aplicação específica
@@ -63,17 +89,37 @@ set "PYTHON_APP_DIR=C:\Caminho\Para\SuaAplicacao"
 set "PYTHON_SCRIPT=main.py"
 ```
 
-### 🚀 **Processo de Instalação em Nova Máquina**
-1. **Copiar** a pasta completa `InicializacaoRobosBat` para qualquer local
-2. **Editar** apenas `PYTHON_APP_DIR` no `inicializar_robo.bat`
+### 🚀 **Processo de Instalação em Nova Máquina (SIMPLIFICADO)**
+1. **Copiar** a pasta completa `InicializacaoRobosBat` para qualquer local (C:\Projects\ ou C:\Repositorios\)
+2. **✅ SEM EDIÇÃO NECESSÁRIA** - Detecção automática de diretório!
 3. **Executar** `configurar_inicializacao.bat` como administrador
-4. **Pronto!** O sistema funciona automaticamente
+4. **Pronto!** Console "Automação Python" inicia automaticamente no login
 
 ### 🔧 **Compatibilidade Garantida**
 - ✅ **Windows 10/11** - Qualquer versão
 - ✅ **Qualquer diretório** - C:\, D:\, rede, etc.
 - ✅ **Qualquer usuário** - Scripts se adaptam automaticamente
 - ✅ **Múltiplas máquinas** - Basta copiar a pasta completa
+
+## 🆕 **Novidades Recentes**
+
+### 🎯 **Detecção Automática de Diretório (Versão Atual)**
+- **🔍 Inteligência de Localização:** Detecta automaticamente se está em `C:\Projects\` ou `C:\Repositorios\`
+- **📂 Zero Configuração Manual:** Não precisa mais editar `PYTHON_APP_DIR` manualmente
+- **🌐 Portabilidade Total:** Funciona em qualquer máquina sem modificação
+- **🔄 Fallback Inteligente:** Se não detectar padrão, usa diretório pai automaticamente
+
+### 🖥️ **Console Otimizado**
+- **🏷️ Título Personalizado:** Console aparece como "Automação Python"
+- **📺 Maximização Automática:** Inicia sempre em tela cheia
+- **📐 Dimensões Otimizadas:** 120 colunas x 40 linhas para melhor visualização
+- **⚡ Inicialização Silenciosa:** Maximização sem interferir na execução
+
+### 🚀 **Execução no Login (vs. Boot)**
+- **👤 Execução no Login:** Executa quando usuário faz login (mais confiável)
+- **⏱️ Sem Delay:** Inicia imediatamente, sem espera de 2 minutos
+- **🔐 Privilégios Adequados:** Executa como usuário atual com privilégios elevados
+- **🎯 Mais Estável:** Menos problemas de permissão que execução como SYSTEM
 
 ## Estrutura de Arquivos
 
@@ -101,18 +147,18 @@ set "PYTHON_SCRIPT=main.py"
 
 ## Como Usar
 
-### 1. Configuração (OBRIGATÓRIA - UMA ÚNICA VEZ)
+### 1. Configuração (AUTOMÁTICA - SEM EDIÇÃO NECESSÁRIA) 🎉
 
-**📍 Localização:** Edite **APENAS** o arquivo `inicializar_robo.bat` (linhas 9-15):
+**� Detecção Automática:** O sistema detecta automaticamente o diretório da aplicação:
 
 ```batch
-:: ============ CONFIGURAÇÕES - EDITE AQUI ============
-:: ⚠️  ATENÇÃO: Configure apenas o caminho da SUA aplicação Python
-:: 🔄 Todos os outros caminhos são calculados automaticamente
+:: ============ CONFIGURAÇÕES - AUTOMÁTICAS ============
+:: 🎯 PYTHON_APP_DIR é detectado automaticamente baseado na localização do script:
+::    • Se .bat está em C:\Projects\InicializacaoRobosBat\ → detecta C:\Projects\RaspagemInput\
+::    • Se .bat está em C:\Repositorios\InicializacaoRobosBat\ → detecta C:\Repositorios\RaspagemInput\
+::    • Fallback: usa diretório pai + RaspagemInput
 
-set "PYTHON_APP_DIR=C:\caminho\para\sua\aplicacao"  :: ← EDITE ESTE
 set "PYTHON_SCRIPT=main.py"                        :: ← EDITE SE NECESSÁRIO
-set "PYTHON_EXECUTABLE=python"                     :: ← Base (será sobrescrito pelo venv)
 set "ENVIRONMENT_PARAM=PRD"                        :: ← Parâmetro de ambiente (PRD/DEV/TEST)
 set "VENV_NAME=venv"                               :: ← Nome do ambiente virtual
 set "REQUIREMENTS_FILE=requirements.txt"           :: ← Arquivo de dependências
@@ -122,12 +168,11 @@ set "VERBOSE_OUTPUT=true"                          :: ← PADRÃO: OK
 set "AUTO_INSTALL_REQUIREMENTS=true"              :: ← Instalar dependências automaticamente
 ```
 
-**🎯 Exemplo de Configuração Real:**
-```batch
-set "PYTHON_APP_DIR=C:\MeusProjetos\RaspagemInput"  :: Sua aplicação
-set "PYTHON_SCRIPT=main.py"                        :: Arquivo principal
-:: ✅ Todos os outros caminhos (logs, scripts) são automáticos!
-```
+**✅ Vantagens da Detecção Automática:**
+- 🎯 **Zero configuração manual** do diretório
+- 🌐 **Portabilidade total** entre máquinas
+- 🔄 **Funciona imediatamente** após cópia do projeto
+- 📂 **Suporta múltiplos padrões** (Projects, Repositorios, etc.)
 
 ### 2. Execução
 
@@ -671,6 +716,22 @@ git pull origin main
 - **Documentação:** Este arquivo README.md
 
 ---
+
+## 📋 **Changelog - Outubro 2025**
+
+### 🎉 **Versão 3.0 - Melhorias Recentes**
+- ✅ **Detecção Automática de Diretório:** Zero configuração manual necessária
+- ✅ **Console Otimizado:** Título "Automação Python", maximização automática, dimensões 120x40
+- ✅ **Execução no Login:** Mais confiável que execução no boot, sem delay
+- ✅ **Portabilidade Total:** Funciona em qualquer máquina sem modificações
+- ✅ **Interface Melhorada:** Maximização silenciosa sem interferir na execução
+
+### 🔧 **Melhorias Técnicas**
+- Lógica inteligente de detecção de diretório (Projects/Repositorios)
+- Comando PowerShell otimizado para maximização do console  
+- Configuração de Task Scheduler atualizada para execução no login
+- Fallback automático para diretórios não padronizados
+- Logs melhorados com detecção de diretório
 
 **Última Atualização:** Outubro 2025  
 **Compatibilidade:** Windows 10/11, PowerShell 5.1+, Python 3.6+

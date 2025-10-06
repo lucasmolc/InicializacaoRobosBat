@@ -4,10 +4,28 @@
 :: Versao Otimizada - Sem Ambiente Virtual
 :: ========================================
 
+:: Configurar console
+title Automação Python
+mode con cols=120 lines=40
+
 setlocal EnableDelayedExpansion
 
 :: ============ CONFIGURACOES - EDITE AQUI ============
-set "PYTHON_APP_DIR=C:\Repositorios\RaspagemInput"
+:: Detectar automaticamente o diretorio da aplicacao
+set "CURRENT_DIR=%~dp0"
+for /f "tokens=1,2,3 delims=\" %%a in ("%CURRENT_DIR%") do (
+    if /i "%%b"=="Projects" (
+        set "BASE_DIR=%%a\%%b"
+    ) else if /i "%%b"=="Repositorios" (
+        set "BASE_DIR=%%a\%%b"
+    )
+)
+:: Se não encontrou Projects ou Repositorios, usar diretório pai do script
+if not defined BASE_DIR (
+    for %%i in ("%CURRENT_DIR%..") do set "BASE_DIR=%%~fi"
+)
+set "PYTHON_APP_DIR=%BASE_DIR%\RaspagemInput"
+
 set "PYTHON_SCRIPT=main.py"
 set "PYTHON_EXECUTABLE=python"
 set "ENVIRONMENT_PARAM=PRD"
@@ -26,12 +44,17 @@ set "LOG_FILE=%LOG_FILE: =0%"
 :: Criar diretorio de logs se nao existir
 if not exist "%~dp0logs" mkdir "%~dp0logs"
 
+:: Maximizar janela do console
+powershell -WindowStyle Hidden -Command "Add-Type -TypeDefinition 'using System; using System.Diagnostics; using System.Runtime.InteropServices; public class Win { [DllImport(\"user32.dll\")] public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow); } '; $p = Get-Process -Id $PID; [Win]::ShowWindow($p.MainWindowHandle, 3) | Out-Null" 2>nul >nul
+
 :: Iniciar log
 echo ========================================== >> "%LOG_FILE%"
 echo [%date% %time%] Iniciando processo de verificacao e execucao >> "%LOG_FILE%"
+echo [%date% %time%] Diretorio detectado automaticamente: %PYTHON_APP_DIR% >> "%LOG_FILE%"
 echo ========================================== >> "%LOG_FILE%"
 
 if "%VERBOSE_OUTPUT%"=="true" (
+    echo [INFO] Diretorio detectado: %PYTHON_APP_DIR%
     echo [INFO] Verificando atualizacoes do repositorio...
 )
 echo [%date% %time%] [INFO] Verificando atualizacoes do repositorio... >> "%LOG_FILE%"
