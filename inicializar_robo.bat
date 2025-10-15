@@ -116,6 +116,26 @@ if %errorlevel% equ 0 (
     )
     echo [%date% %time%] [INFO] Atualizacoes encontradas! Executando git pull... >> "%LOG_FILE%"
     
+    :: Verificar se ha alteracoes locais
+    git diff --quiet 2>nul
+    if %errorlevel% neq 0 (
+        if "%VERBOSE_OUTPUT%"=="true" (
+            echo [INFO] Salvando alteracoes locais com git stash...
+        )
+        echo [%date% %time%] [INFO] Salvando alteracoes locais com git stash... >> "%LOG_FILE%"
+        
+        git stash push -m "Auto-stash antes do pull automatico - %date% %time%" 2>>"%LOG_FILE%"
+        if %errorlevel% equ 0 (
+            if "%VERBOSE_OUTPUT%"=="true" (
+                echo [SUCESSO] Alteracoes locais salvas no stash
+            )
+            echo [%date% %time%] [SUCESSO] Alteracoes locais salvas no stash >> "%LOG_FILE%"
+        ) else (
+            echo [AVISO] Falha ao salvar stash, continuando mesmo assim
+            echo [%date% %time%] [AVISO] Falha ao salvar stash >> "%LOG_FILE%"
+        )
+    )
+    
     git pull origin 2>>"%LOG_FILE%"
     if %errorlevel% equ 0 (
         if "%VERBOSE_OUTPUT%"=="true" (
